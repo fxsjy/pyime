@@ -7,7 +7,9 @@ py_freq= {}
 p2c = {}
 py_short = {}
 re_eng = re.compile('([a-zA-Z]+)')
-MAX_FREQ = 60000
+MAX_FREQ = 260000
+MAX_SEARCH_ENTRIES = 1000
+MAX_SHOW_ENTRIES = 15
 
 for line in open("freq.txt"):
     line = line.rstrip()
@@ -65,18 +67,31 @@ def dp_cut(sentence):
             start = best_hop[start][0][1]
      return [top1,top2]
 
-def all_combine(m,idx,ct):
+
+def all_combine_idx(m,idx,tb):
     if idx==len(m)-1:
-        for w in m[idx]:
-            yield w
+        for i in xrange(0,len(m[idx])):
+            if tb['n']>MAX_SEARCH_ENTRIES:
+                return
+            yield [i]
+            tb['n']=tb.get('n',0)+1  
     else:
-        for w in m[idx]:
-            i=0
-            for sub in all_combine(m,idx+1,ct):
-                yield w+sub
-                i+=1
-                if i>=ct:
-                    break
+        for w in xrange(0,len(m[idx])):
+            if tb['n']>MAX_SEARCH_ENTRIES:
+                    return
+            for sub in all_combine_idx(m,idx+1,tb):
+                if tb['n']>MAX_SEARCH_ENTRIES:
+                    return
+                yield [w]+sub
+
+def all_combine(m,idx):
+    tb = {'n':0}
+    all_index_list = sorted(all_combine_idx(m,idx,tb),key=lambda x: sum(x))
+    if len(m)>1:
+        all_index_list = all_index_list[:MAX_SHOW_ENTRIES]
+    for column in all_index_list:
+        yield "".join(m[i][column[i]] for i in xrange(len(m)))
+
 
 def pyshort_filter(mixed,ct):
     mixed = mixed.replace("'","")
@@ -86,25 +101,25 @@ def pyshort_filter(mixed,ct):
             m.append([chunk])
         else:
             m.append(py_short[chunk][:ct])
-    for c in all_combine(m,0,ct):
+    for c in all_combine(m,0):
         yield c
 
-def guess_words(sentence,ct=3):
+def guess_words(sentence):
     if len(sentence)>0:
         bucket = {}
         for py_list in dp_cut(sentence):
             m=[]
             for p in py_list:
                 if len(p)<6:
-                    if len(py_list)==1: #single character, so more candidates
-                        span = 30
+                    if len(py_list)==1: #single character, show all candidates
+                        span = -1
                     else:
                         span = 6
                 else:
                     span = 3
                 m.append( p2c.get(p,[p])[:span] )
-            for c in all_combine(m,0,ct):
-                for cc in pyshort_filter(c, ct*2):
+            for c in all_combine(m,0):
+                for cc in pyshort_filter(c, 6):
                     if not cc in bucket:
                         yield cc
                         bucket[cc]=1
