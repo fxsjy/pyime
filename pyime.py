@@ -7,11 +7,15 @@ py_freq= {}
 p2c = {}
 py_short = {}
 re_eng = re.compile('([a-zA-Z]+)')
+MAX_FREQ = 60000
 
 for line in open("freq.txt"):
     line = line.rstrip()
     py,freq = line.split(' ')
-    py_freq[py] = py_freq.get(py,0)+float(freq)
+    freq = float(freq)
+    if freq>MAX_FREQ: #cut the over-high frequency
+        freq = MAX_FREQ
+    py_freq[py] = py_freq.get(py,0)+freq
 
 for line in open("p2c.txt"):
     line = line.decode('utf-8').rstrip()
