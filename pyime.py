@@ -87,17 +87,24 @@ def pyshort_filter(mixed,ct):
 
 def guess_words(sentence,ct=3):
     if len(sentence)>0:
+        bucket = {}
         for py_list in dp_cut(sentence):
             m=[]
-            if len(py_list)==1:
-                ct = 30
-            else:
-                ct = 3
             for p in py_list:
-                m.append( p2c.get(p,[p])[:ct] )
+                if len(p)<6:
+                    if len(py_list)==1: #single character, so more candidates
+                        span = 30
+                    else:
+                        span = 6
+                else:
+                    span = 3
+                m.append( p2c.get(p,[p])[:span] )
             for c in all_combine(m,0,ct):
-                for cc in pyshort_filter(c, ct):
-                    yield cc
+                for cc in pyshort_filter(c, ct*2):
+                    if not cc in bucket:
+                        yield cc
+                        bucket[cc]=1
+        del bucket
 
 if __name__ == "__main__":
     while True:
