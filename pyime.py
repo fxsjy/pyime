@@ -107,7 +107,10 @@ def pyshort_filter(mixed,ct):
 def guess_words(sentence):
     if len(sentence)>0:
         bucket = {}
+        showed = 0
         for py_list in dp_cut(sentence):
+            if showed>=MAX_SHOW_ENTRIES:
+                break
             m=[]
             for p in py_list:
                 if len(p)<6:
@@ -119,10 +122,15 @@ def guess_words(sentence):
                     span = 3
                 m.append( p2c.get(p,[p])[:span] )
             for c in all_combine(m,0):
+                if showed>=MAX_SHOW_ENTRIES:
+                    break
                 for cc in pyshort_filter(c, 6):
                     if not cc in bucket:
                         yield cc
                         bucket[cc]=1
+                        showed+=1
+                        if showed>=MAX_SHOW_ENTRIES:
+                            break
         del bucket
 
 if __name__ == "__main__":
