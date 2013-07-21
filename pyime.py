@@ -66,10 +66,7 @@ def dp_cut(sentence):
         else:
             top2.append(sentence[start:best_hop[start][0][1]])
             start = best_hop[start][0][1]
-     if len(top1)<=len(top2):
-        return [top1,top2]
-     else:
-        return [top2,top1]
+     return [top1,top2]
 
 
 def all_combine_idx(m,idx,tb):
