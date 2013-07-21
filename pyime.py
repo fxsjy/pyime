@@ -24,6 +24,7 @@ for line in open("p2c.txt"):
     py,words = line.split(' ')
     p2c[py] = words.split(',')
 
+
 for line in open("short.txt"):
     line = line.decode('utf-8').rstrip()
     py,words = line.split(' ')
@@ -65,7 +66,10 @@ def dp_cut(sentence):
         else:
             top2.append(sentence[start:best_hop[start][0][1]])
             start = best_hop[start][0][1]
-     return [top1,top2]
+     if len(top1)<=len(top2):
+        return [top1,top2]
+     else:
+        return [top2,top1]
 
 
 def all_combine_idx(m,idx,tb):
@@ -115,12 +119,13 @@ def guess_words(sentence):
             for p in py_list:
                 if len(p)<6:
                     if len(py_list)==1: #single character, show all candidates
-                        span = -1
+                        span = MAX_SEARCH_ENTRIES
                     else:
                         span = 6
                 else:
                     span = 3
                 m.append( p2c.get(p,[p])[:span] )
+            
             for c in all_combine(m,0):
                 if showed>=MAX_SHOW_ENTRIES:
                     break
