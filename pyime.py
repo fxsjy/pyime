@@ -2,40 +2,23 @@ import re
 from math import log
 from string import ascii_lowercase
 from heapq import nlargest
+import marshal
 
 py_freq= {}
 p2c = {}
 py_short = {}
-re_eng = re.compile('([a-zA-Z]+)')
-MAX_FREQ = 260000
+re_eng = re.compile('([a-zA-Z\n]+)')
 MAX_SEARCH_ENTRIES = 1000
 MAX_SHOW_ENTRIES = 15
 
-for line in open("freq.txt"):
-    line = line.rstrip()
-    py,freq = line.split(' ')
-    freq = float(freq)
-    if freq>MAX_FREQ: #cut the over-high frequency
-        freq = MAX_FREQ
-    py_freq[py] = py_freq.get(py,0)+freq
-
-for line in open("p2c.txt"):
-    line = line.decode('utf-8').rstrip()
-    py,words = line.split(' ')
-    p2c[py] = words.split(',')
-
-
-for line in open("short.txt"):
-    line = line.decode('utf-8').rstrip()
-    py,words = line.split(' ')
-    py_short[py] = words.split(',')
-
-total = sum(py_freq.values())
-
-py_freq = dict( (k,log(v/total)) for k,v in py_freq.iteritems())
+py_freq = marshal.load(file('data/py.freq','rb'))
+p2c = marshal.load(file('data/p2c.map','rb'))
+py_short = marshal.load(file('data/short.map','rb'))
+chn_freq = marshal.load(file('data/chn.freq','rb'))
 
 min_freq = min(py_freq.values())
 single_letters = set(ascii_lowercase)
+
 print "data loaded."
 
 def word_rank(word):
@@ -85,19 +68,24 @@ def all_combine_idx(m,idx,tb):
                     return
                 yield [w]+sub
 
+def chn_rank(word):
+    q = chn_freq.get(word,min_freq*10)
+    return q
+
 def all_combine(m,idx):
     tb = {'n':0}
-    all_index_list = sorted(all_combine_idx(m,idx,tb),key=lambda x: sum(x))
+    all_index_list = sorted(all_combine_idx(m,idx,tb),key=lambda L: sum(chn_rank(m[i][j]) for i,j in enumerate(L) ) ,reverse=True)
     if len(m)>1:
         all_index_list = all_index_list[:MAX_SHOW_ENTRIES]
     for column in all_index_list:
-        yield "".join(m[i][column[i]] for i in xrange(len(m)))
+        yield "\n".join(m[i][column[i]] for i in xrange(len(m)))
 
 
 def pyshort_filter(mixed,ct):
     mixed = mixed.replace("'","")
     m = []
     for chunk in re_eng.split(mixed):
+        chunk = chunk.replace("\n","")
         if not (chunk in py_short):
             m.append([chunk])
         else:
@@ -105,11 +93,13 @@ def pyshort_filter(mixed,ct):
     for c in all_combine(m,0):
         yield c
 
-def guess_words(sentence):
+def guess_words_no_sort(sentence):
     if len(sentence)>0:
         bucket = {}
         showed = 0
+        py_list = dp_cut(sentence)
         for py_list in dp_cut(sentence):
+            sub_showed = 0
             if showed>=MAX_SHOW_ENTRIES:
                 break
             m=[]
@@ -124,19 +114,27 @@ def guess_words(sentence):
                 m.append( p2c.get(p,[p])[:span] )
             
             for c in all_combine(m,0):
-                if showed>=MAX_SHOW_ENTRIES:
+                if sub_showed>=MAX_SHOW_ENTRIES/2:
                     break
                 for cc in pyshort_filter(c, 6):
                     if not cc in bucket:
                         yield cc
                         bucket[cc]=1
-                        showed+=1
-                        if showed>=MAX_SHOW_ENTRIES:
+                        if len(cc)>1:
+                            showed+=1
+                            sub_showed+=1
+                        if sub_showed>=MAX_SHOW_ENTRIES/2:
                             break
         del bucket
+
+def guess_words(sentence):
+    result = guess_words_no_sort(sentence)
+    st_list = sorted( [(sum(chn_rank(word) for word in s.split('\n')),s) for s in result], reverse=True)
+    return [x[1].replace("\n",'') for x in st_list]
 
 if __name__ == "__main__":
     while True:
         py_sentence = raw_input("")
-        print ",  ".join( guess_words(py_sentence))
+        gussed_words = guess_words(py_sentence)
+        print ",  ".join(gussed_words )
 
