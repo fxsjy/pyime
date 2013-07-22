@@ -89,11 +89,12 @@ def guess_words_no_sort(sentence):
                 m.append( p2c.get(p,[p])[:span] )
             
             for c in all_combine(m,0):
+                stripped = c.replace("\n","")
                 if sub_showed>=MAX_SHOW_ENTRIES/2:
                     break
-                if not c in bucket:
+                if not stripped in bucket:
                     yield c
-                    bucket[c]=1
+                    bucket[stripped]=1
                     if len(c)>1:
                         showed+=1
                         sub_showed+=1
