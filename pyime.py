@@ -9,14 +9,15 @@ from pprint import pprint
 from math import log
 import time
 import codecs
+from itertools import product
 
 py_freq= {}
 p2c = {}
 chn_freq = {}
 MAX_SEARCH_ENTRIES = 1000
 MAX_SHOW_ENTRIES = 15
-DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),'data/pinyin_final.txt')
-CACHE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),'data/pinyin_final.cache')
+DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),'data/pinyin_small.txt')
+CACHE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),'data/pinyin.cache')
 #start init
 t_start = time.time()
 try:
@@ -32,16 +33,21 @@ except IOError:
         line = None
         freq = int(freq)
         plain_py = py.replace(" ","")
-        initial_py = "".join(x[0] for x in py.split(" "))
         chn_freq[word] = chn_freq.get(word,0)+freq
         py_freq[plain_py] = py_freq.get(plain_py,0)+freq
-        py_freq[initial_py] = py_freq.get(initial_py,0) + max(int(log(freq)),1)
         if not plain_py in p2c:
             p2c[plain_py] = []
-        if not initial_py in p2c:
-            p2c[initial_py] = []
         p2c[plain_py].append((freq,word))
-        p2c[initial_py].append((freq,word))
+        py_array = py.split(" ")
+        py_short = [x[0] for x in py_array]
+        if len(py_array)<=6:
+            for ip in product(*zip(py_array,py_short)):
+                initial_py = "".join(ip)
+                py_freq[initial_py] = py_freq.get(initial_py,0) + max(int(log(freq)),1)
+                if not initial_py in p2c:
+                    p2c[initial_py] = []
+                p2c[initial_py].append((freq,word))
+
     lines = None
 
     p2c      = dict( ( k,tuple( w[1] for w in sorted(v,reverse=True) ) ) for k,v in p2c.iteritems())

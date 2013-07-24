@@ -34,4 +34,5 @@ nosetests.xml
 .project
 .pydevproject
 data/pinyin_final.cache
+data/pinyin.cache
 tmp
