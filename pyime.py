@@ -4,18 +4,45 @@ from string import ascii_lowercase
 from heapq import nlargest
 import marshal
 from pprint import pprint
+from math import log
 
 py_freq= {}
 p2c = {}
-py_short = {}
+chn_freq = {}
 MAX_SEARCH_ENTRIES = 1000
 MAX_SHOW_ENTRIES = 15
 
-py_freq = marshal.load(file('data/py.freq','rb'))
-p2c = marshal.load(file('data/p2c.map','rb'))
-chn_freq = marshal.load(file('data/chn.freq','rb'))
+#start init
+lines = []
+with open('data/pinyin_final.txt','rb') as txt:
+    lines = txt.readlines()
 
+for line in lines:
+    word,py,freq = line.rstrip().split('\t')
+    word = word.decode('utf-8')
+    freq = int(freq)
+    plain_py = py.replace("'","")
+    initial_py = "".join(x[0] for x in py.split("'"))
+    
+    chn_freq[word] = chn_freq.get(word,0)+freq
+    py_freq[plain_py] = py_freq.get(plain_py,0)+freq
+    py_freq[initial_py] = py_freq.get(initial_py,0) + max(int(log(freq)),1)
+    if not plain_py in p2c:
+        p2c[plain_py] = []
+    if not initial_py in p2c:
+        p2c[initial_py] = []
+    p2c[plain_py].append((freq,word))
+    p2c[initial_py].append((freq,word))
+
+p2c      = dict( ( k,tuple( w[1] for w in sorted(v,reverse=True) ) ) for k,v in p2c.iteritems())
+total    = sum(chn_freq.itervalues())
+chn_freq = dict( (k,log(float(v)/total)) for k,v in chn_freq.iteritems() )
+py_freq  = dict( (k,log(float(v)/total)) for k,v in py_freq.iteritems()  ) 
 min_freq = min(py_freq.values())
+
+#end init
+
+
 single_letters = set(ascii_lowercase)
 
 print "data loaded."
