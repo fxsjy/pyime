@@ -1,45 +1,58 @@
+from __future__ import with_statement
 import re
+import os
 from math import log
 from string import ascii_lowercase
 from heapq import nlargest
 import marshal
 from pprint import pprint
 from math import log
+import time
+import codecs
 
 py_freq= {}
 p2c = {}
 chn_freq = {}
 MAX_SEARCH_ENTRIES = 1000
 MAX_SHOW_ENTRIES = 15
-
+DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),'data/pinyin_final.txt')
+CACHE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),'data/pinyin_final.cache')
 #start init
-lines = []
-with open('data/pinyin_final.txt','rb') as txt:
-    lines = txt.readlines()
+t_start = time.time()
+try:
+    with file(CACHE_PATH,'rb') as cache_file:
+        p2c,chn_freq,py_freq,min_freq = marshal.load(cache_file)
+except IOError:
+    lines = []
+    with codecs.open(DATA_PATH,encoding='utf-8') as txt:
+        lines = txt.readlines()
 
-for line in lines:
-    word,py,freq = line.rstrip().split('\t')
-    word = word.decode('utf-8')
-    freq = int(freq)
-    plain_py = py.replace(" ","")
-    initial_py = "".join(x[0] for x in py.split(" "))
-    
-    chn_freq[word] = chn_freq.get(word,0)+freq
-    py_freq[plain_py] = py_freq.get(plain_py,0)+freq
-    py_freq[initial_py] = py_freq.get(initial_py,0) + max(int(log(freq)),1)
-    if not plain_py in p2c:
-        p2c[plain_py] = []
-    if not initial_py in p2c:
-        p2c[initial_py] = []
-    p2c[plain_py].append((freq,word))
-    p2c[initial_py].append((freq,word))
+    for line in lines:
+        word,py,freq = line.rstrip().split('\t')
+        line = None
+        freq = int(freq)
+        plain_py = py.replace(" ","")
+        initial_py = "".join(x[0] for x in py.split(" "))
+        chn_freq[word] = chn_freq.get(word,0)+freq
+        py_freq[plain_py] = py_freq.get(plain_py,0)+freq
+        py_freq[initial_py] = py_freq.get(initial_py,0) + max(int(log(freq)),1)
+        if not plain_py in p2c:
+            p2c[plain_py] = []
+        if not initial_py in p2c:
+            p2c[initial_py] = []
+        p2c[plain_py].append((freq,word))
+        p2c[initial_py].append((freq,word))
+    lines = None
 
-p2c      = dict( ( k,tuple( w[1] for w in sorted(v,reverse=True) ) ) for k,v in p2c.iteritems())
-total    = sum(chn_freq.itervalues())
-chn_freq = dict( (k,log(float(v)/total)) for k,v in chn_freq.iteritems() )
-py_freq  = dict( (k,log(float(v)/total)) for k,v in py_freq.iteritems()  ) 
-min_freq = min(py_freq.values())
+    p2c      = dict( ( k,tuple( w[1] for w in sorted(v,reverse=True) ) ) for k,v in p2c.iteritems())
+    total    = sum(chn_freq.itervalues())
+    chn_freq = dict( (k,log(float(v)/total)) for k,v in chn_freq.iteritems() )
+    py_freq  = dict( (k,log(float(v)/total)) for k,v in py_freq.iteritems()  ) 
+    min_freq = min(py_freq.values())
+    with file(CACHE_PATH,'wb') as cache_file:
+        marshal.dump((p2c,chn_freq,py_freq,min_freq),cache_file)
 
+print "init cost: ", time.time() - t_start
 #end init
 
 
