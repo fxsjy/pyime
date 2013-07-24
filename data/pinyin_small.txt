@@ -1262,6 +1262,7 @@
 天河体育中心	tian he ti yu zhong xin	4
 十年磨一剑	shi nian mo yi jian	6
 西安交通大学	xi an jiao tong da xue	121
+西安交通大学	xi'an jiao tong da xue	121
 重庆市政府	zhong qing shi zheng fu	4
 第二十三章	di er shi san zhang	39
 联合国安理会	lian he guo an li hui	183
@@ -3320,6 +3321,7 @@
 劳动合同制	lao dong he tong zhi	9
 拉贾斯坦邦	la jia si tan bang	9
 西安政治学院	xi an zheng zhi xue yuan	5
+西安政治学院	xi'an zheng zhi xue yuan	5
 六万五千美元	liu wan wu qian mei yuan	2
 二百七十六年	er bai qi shi liu nian	2
 九百九十九步	jiu bai jiu shi jiu bu	2
@@ -4014,6 +4016,7 @@
 阿尔瓦拉多	a er wa la duo	3
 三千六百九十	san qian liu bai jiu shi	2
 西安美术学院	xi an mei shu xue yuan	4
+西安美术学院	xi'an mei shu xue yuan	4
 朝天门码头	zhao tian men ma tou	6
 不问青红皂白	bu wen qing hong zao bai	22
 海军南海舰队	hai jun nan hai jian dui	14
@@ -4604,6 +4607,7 @@
 俄罗斯政府	e luo si zheng fu	22
 太原火车站	tai yuan huo che zhan	2
 西安市卫生局	xi an shi wei sheng ju	2
+西安市卫生局	xi'an shi wei sheng ju	2
 胎盘球蛋白	tai pan qiu dan bai	5
 二千九百两	er qian jiu bai liang	2
 萨姆索诺夫	sa mu suo nuo fu	2
@@ -41796,6 +41800,7 @@
 喜爱	xi ai	2735
 西岸	xi an	216
 西安	xi an	5095
+西安	xi'an	5095
 希尔	xi er	265
 西欧	xi ou	333
 下吧	xia ba	251
@@ -60434,6 +60439,7 @@
 吸引人	xi yin ren	740
 西游记	xi you ji	455
 西安市	xi an shi	544
+西安市	xi'an shi	544
 希尔顿	xi er dun	266
 下半年	xia ban nian	1983
 下半场	xia ban chang	544
