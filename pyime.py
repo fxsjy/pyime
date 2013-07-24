@@ -21,8 +21,8 @@ for line in lines:
     word,py,freq = line.rstrip().split('\t')
     word = word.decode('utf-8')
     freq = int(freq)
-    plain_py = py.replace("'","")
-    initial_py = "".join(x[0] for x in py.split("'"))
+    plain_py = py.replace(" ","")
+    initial_py = "".join(x[0] for x in py.split(" "))
     
     chn_freq[word] = chn_freq.get(word,0)+freq
     py_freq[plain_py] = py_freq.get(plain_py,0)+freq
